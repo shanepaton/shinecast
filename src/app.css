@@ -187,6 +187,17 @@ textarea {
   font: inherit;
 }
 
+body {
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+}
+
 .panel {
     background: var(--panel);
     color: var(--text);

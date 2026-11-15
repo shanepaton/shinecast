@@ -20,20 +20,22 @@
 </section>
 
 <style>
-    .tournament-info {
+    .panel,
+    .tournament-info,
+    .formats {
         display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
         gap: 0.5rem;
-        margin-bottom: 0.5rem;
+    }
+
+    .tournament-info {
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
     }
 
     .tournament-info > * {
         min-width: 0;
     }
-    .formats {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 0.5rem;
-    }
 
+    .formats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
 </style>
