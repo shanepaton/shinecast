@@ -10,6 +10,8 @@
     --spacing: 0.5rem;
     --radius: 0.25rem;
     --press-depth: 3px;
+    --cell: 3rem; /* one skin slot or port button */
+    --stock-icon: 36px; /* 1.5x the 24px stock icon */
     --shadow: 0 var(--press-depth) 0 #151a23;
 
     font: 1rem/1.5 "Ioskeley Mono", monospace;
@@ -20,6 +22,14 @@
 
 body {
     margin: 0;
+}
+
+img {
+    image-rendering: pixelated; /* nearest-neighbour filtering for all the pixel art */
+}
+
+img[src$=".svg"] {
+    image-rendering: auto; /* vectors, not pixel art */
 }
 
 .container, .panel, .row {
@@ -69,12 +79,23 @@ button:focus-visible {
     outline-offset: 3px;
 }
 
-.formats button {
+/* Registered so the skin buttons' exit transition can fade the icon smoothly; unregistered custom properties jump. */
+@property --icon-opacity {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 1;
+}
+
+.formats, .score, .skins {
+    padding-bottom: var(--press-depth); /* room for the shadow, which the pressed button sinks into */
+}
+
+.formats button, .score button, .slot button, .dropdown input {
     box-shadow: var(--shadow);
     transition: transform 80ms ease-out, box-shadow 80ms ease-out;
 }
 
-.formats button:active, .formats button[aria-pressed="true"] {
+.formats button:active, .formats button[aria-pressed="true"], .slot button:active, .slot button[aria-pressed="true"], .score button:active, .score button:disabled, .dropdown input:focus {
     transform: translateY(var(--press-depth));
     box-shadow: none;
 }
@@ -85,8 +106,9 @@ button:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .formats button {
-        transition: none;
+    *, ::before, ::after {
+        animation: none !important;
+        transition: none !important;
     }
 }
 
@@ -98,7 +120,22 @@ button:focus-visible {
 .dropdown input {
     box-sizing: border-box;
     width: 100%;
+    padding-block: calc(var(--spacing) - 1px); /* offset the 1px border so it matches the buttons' height */
     padding-right: 2rem;
+}
+
+.dropdown .trigger {
+    display: block;
+    padding: 0 0 var(--press-depth); /* room for the shadow, which the pressed icon sinks into */
+    overflow: visible;
+    background: none;
+    filter: drop-shadow(var(--shadow));
+    transition: transform 80ms ease-out, filter 80ms ease-out;
+}
+
+.dropdown .trigger:active, .dropdown.open .trigger {
+    transform: translateY(var(--press-depth));
+    filter: none;
 }
 
 .chevron {
@@ -109,6 +146,10 @@ button:focus-visible {
     pointer-events: none;
 }
 
+.dropdown:focus-within .chevron {
+    translate: 0 calc(-50% + var(--press-depth));
+}
+
 .dropdown.open .chevron {
     rotate: 180deg;
 }
@@ -116,7 +157,8 @@ button:focus-visible {
 .dropdown-menu {
     position: absolute;
     top: calc(100% + var(--spacing));
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     box-sizing: border-box;
     z-index: 10;
     overflow-y: auto;
@@ -130,18 +172,26 @@ button:focus-visible {
     bottom: calc(100% + var(--spacing));
 }
 
+.dropdown-menu.end {
+    right: 0;
+}
+
 .dropdown-menu button {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: var(--spacing);
     width: 100%;
     text-align: left;
     background: transparent;
 }
 
+.dropdown-menu button span {
+    margin-left: auto; /* checkmark on the right, everything else on the left */
+}
+
 .dropdown-menu img {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: var(--stock-icon);
+    height: var(--stock-icon);
     object-fit: contain;
 }
 

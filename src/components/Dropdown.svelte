@@ -1,74 +1,95 @@
 <script lang="ts">
-    type Item = { label: string; image?: string };
-    type Props = { options: (string | Item)[]; label: string; placeholder?: string; value?: string };
-    let { options, label, placeholder = "Select or type an option", value = $bindable("") }: Props = $props();
+    import type { Snippet } from "svelte";
 
+    type Option = { label: string; image?: string };
+    type Props = { options: (string | Option)[]; label: string; placeholder?: string; value?: string; trigger?: Snippet };
+    let { options, label, placeholder = "Select or type an option", value = $bindable(""), trigger }: Props = $props();
+
+    const VISIBLE_ROWS = 5; // the list scrolls past this many
     const id = $props.id();
-    let input: HTMLInputElement;
-    let query = $state<string | null>(null); // null = closed, "" = show every option
-    let highlighted = $state(-1);
 
-    const items = $derived(options.map((option) => (typeof option === "string" ? { label: option } : option)));
-    const matches = $derived(items.filter((item) => item.label.toLowerCase().includes(query ?? "")));
-    const open = $derived(query !== null && matches.length > 0);
+    let control = $state<HTMLElement>(); // the input (or custom trigger) the list hangs off
+    let search = $state<string | null>(null); // what has been typed so far, or null while the list is closed
+    let highlighted = $state(-1); // the option under the keyboard or pointer, -1 for none
 
-    const close = () => (query = null);
+    const allOptions = $derived(options.map((option) => (typeof option === "string" ? { label: option } : option)));
+    const visible = $derived(allOptions.filter((option) => option.label.toLowerCase().includes(search ?? "")));
+    const isOpen = $derived(search !== null && visible.length > 0);
 
-    function show(text = "") {
-        query = text.toLowerCase();
+    const close = () => (search = null);
+    const toggle = () => (isOpen ? close() : openList());
+
+    function openList(typed = "") {
+        search = typed.toLowerCase();
         highlighted = -1;
     }
 
-    function pick(item?: Item) {
-        if (item) value = item.label;
+    // Picking nothing (Enter with no highlight) just closes the list and keeps whatever was typed.
+    function choose(option?: Option) {
+        if (option) value = option.label;
         close();
     }
 
-    function handleKey(event: KeyboardEvent) {
+    function onKeydown(event: KeyboardEvent) {
         const step = { ArrowDown: 1, ArrowUp: -1 }[event.key];
-        if (step && (open || options.length)) {
-            if (!open) show();
-            if (highlighted < 0 && step < 0) highlighted = 0; // so ArrowUp from nothing wraps to the last item
-            highlighted = (highlighted + step + matches.length) % matches.length;
+        if (step && options.length) {
+            if (!isOpen) openList();
+            // With nothing highlighted yet, Down goes to the first option and Up to the last. Otherwise wrap around.
+            highlighted = highlighted < 0 ? (step > 0 ? 0 : visible.length - 1) : (highlighted + step + visible.length) % visible.length;
             document.getElementById(`${id}-${highlighted}`)?.scrollIntoView({ block: "nearest" });
-        } else if (open && event.key === "Enter") pick(matches[highlighted]);
-        else if (open && event.key === "Escape") close();
-        else return;
+        } else if (isOpen && event.key === "Enter") choose(visible[highlighted]);
+        else if (isOpen && event.key === "Escape") close();
+        else return; // any other key is left alone
         event.preventDefault();
     }
 
-    // Opens below the input, or above when there is more room there.
+    // What the input and a custom trigger have in common.
+    const comboboxProps = $derived({
+        role: "combobox", "aria-label": label, "aria-controls": id, "aria-expanded": isOpen,
+        "aria-activedescendant": isOpen && highlighted >= 0 ? `${id}-${highlighted}` : undefined,
+        onkeydown: onKeydown, onblur: close,
+    });
+
+    // Sizes and positions the list when it opens: it shows five options at a time, drops below the control (or goes
+    // above when there is more room there), and lines up with the right edge if it would run off the window.
     function placeMenu(menu: HTMLElement) {
-        const { top, bottom } = input.getBoundingClientRect();
-        const below = innerHeight - bottom - 12;
-        const above = top - 12;
-        menu.classList.toggle("above", below < 240 && above > below);
-        menu.style.maxHeight = `clamp(40px, ${Math.max(below, above)}px, 240px)`;
+        const buttons = menu.querySelectorAll("button");
+        const rowHeight = buttons[0].offsetHeight;
+        const fiveRowsHeight = VISIBLE_ROWS * rowHeight + (menu.offsetHeight - buttons.length * rowHeight); // plus padding and border
+        const { top, bottom, left } = control!.getBoundingClientRect();
+        const spaceBelow = innerHeight - bottom - 12;
+        const spaceAbove = top - 12;
+        menu.classList.toggle("above", spaceBelow < fiveRowsHeight && spaceAbove > spaceBelow);
+        menu.classList.toggle("end", left + menu.offsetWidth > innerWidth - 12);
+        menu.style.maxHeight = `${Math.max(40, Math.min(Math.max(spaceBelow, spaceAbove), fiveRowsHeight))}px`;
     }
 </script>
 
 <svelte:window onblur={close} onresize={close} />
 
-<div class="dropdown" class:open>
-    <input bind:this={input} bind:value {placeholder} autocomplete="off" role="combobox"
-        aria-label={label} aria-controls={id} aria-expanded={open} aria-autocomplete="list"
-        aria-activedescendant={open && highlighted >= 0 ? `${id}-${highlighted}` : undefined}
-        onclick={() => (open ? close() : show())} oninput={(event) => show(event.currentTarget.value)}
-        onkeydown={handleKey} onblur={close} />
-    <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-        <path d="m2 4 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" />
-    </svg>
+<div class="dropdown" class:open={isOpen}>
+    {#if trigger}
+        <button bind:this={control} type="button" class="trigger" {...comboboxProps} onclick={toggle}>
+            {@render trigger()}
+        </button>
+    {:else}
+        <input bind:this={control} bind:value {placeholder} autocomplete="off" aria-autocomplete="list" {...comboboxProps}
+            onclick={toggle} oninput={(event) => openList(event.currentTarget.value)} />
+        <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+            <path d="m2 4 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" />
+        </svg>
+    {/if}
 
-    {#if open}
+    {#if isOpen}
         <div {id} role="listbox" aria-label={label} class="dropdown-menu" {@attach placeMenu}>
-            {#each matches as item, index (item.label)}
-                {@const selected = item.label === value}
+            {#each visible as option, index (option.label)}
+                {@const selected = option.label === value}
                 <button type="button" role="option" tabindex="-1" id="{id}-{index}"
                     aria-selected={selected} class:highlighted={index === highlighted}
                     onpointermove={() => (highlighted = index)} onpointerdown={(event) => event.preventDefault()}
-                    onclick={() => pick(item)}>
-                    {#if item.image}<img src={item.image} alt="" />{/if}
-                    {item.label}
+                    onclick={() => choose(option)}>
+                    {#if option.image}<img src={option.image} alt="" />{/if}
+                    {option.label}
                     {#if selected}<span aria-hidden="true">✓</span>{/if}
                 </button>
             {/each}
