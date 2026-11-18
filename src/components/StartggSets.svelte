@@ -1,72 +1,76 @@
 <script lang="ts">
     import Dropdown from "./Dropdown.svelte";
-    import { fetchSets, isSignedIn, signIn, type StartggSet } from "../lib/startgg";
+    import { cooldown } from "../lib/cooldown";
+    import { errorMessage } from "../lib/errors";
+    import { isSignedIn } from "../lib/startgg/auth";
+    import { fetchSets, type StartggSet } from "../lib/startgg/sets";
     import type { ConnectionState } from "../types/ConnectionData";
 
-    let { status = $bindable(), onselect }: { status: ConnectionState; onselect: (set: StartggSet) => void } = $props();
+    type Props = { status: ConnectionState; signedIn: boolean; slug: string; onselect: (set: StartggSet) => void };
+    let { status = $bindable(), signedIn = $bindable(), slug, onselect }: Props = $props();
 
-    const EVENT_KEY = "startgg-event"; // the last event link, so it's still there next launch
-
-    const alreadySignedIn = isSignedIn();
-    let signedIn = $state(alreadySignedIn);
-    let event = $state(localStorage.getItem(EVENT_KEY) ?? "");
+    // Idle until the dropdown is opened for a bracket, then loading, then loaded (even if the bracket had no sets).
+    let phase = $state<"idle" | "loading" | "loaded">("idle");
     let sets = $state<StartggSet[]>([]);
     let selected = $state("");
     let error = $state("");
-    if (alreadySignedIn) status = "connected";
+    const wait = cooldown(5000); // reopening the list sooner than this reuses it, to go easy on start.gg
 
-    // Runs a start.gg request and shows how it went in the footer. A failure can also mean the login ran out.
-    async function track(request: () => Promise<void>) {
+    const labels = $derived(sets.map((set) => set.label));
+
+    // The sets belong to one bracket, so changing the bracket, or disconnecting in settings, empties the list.
+    $effect(() => {
+        void [signedIn, slug]; // this is what the effect watches
+        phase = "idle";
+        sets = [];
+        selected = "";
+        wait.reset();
+    });
+
+    // Runs when the dropdown opens. Does nothing without a bracket, while a load is under way, or just after one.
+    async function loadSets() {
+        if (!signedIn || !slug || phase === "loading" || !wait.ready()) return;
+
+        phase = "loading";
         status = "connecting";
         error = "";
         try {
-            await request();
+            sets = await fetchSets(slug);
+            phase = "loaded";
             status = "connected";
         } catch (e) {
+            phase = "idle";
             status = "error";
-            error = e instanceof Error ? e.message : String(e);
+            error = errorMessage(e);
         }
-        signedIn = isSignedIn();
+        signedIn = isSignedIn(); // a refused login is cleared, which means signed out
     }
 
-    const connect = () => track(signIn);
-
-    const load = () => track(async () => {
-        sets = await fetchSets(event);
-        localStorage.setItem(EVENT_KEY, event);
-    });
-
-    // The dropdown doubles as a search box, so this also runs on every keystroke. Only an exact match picks a set.
-    function choose(label: string) {
-        selected = label;
+    function pick(label: string) {
         const set = sets.find((candidate) => candidate.label === label);
         if (set) onselect(set);
     }
+
+    const placeholder = $derived(
+        !signedIn ? "Connect start.gg in settings to load sets"
+        : !slug ? "Choose a tournament bracket in settings to load sets"
+        : phase === "loading" ? "Loading sets from start.gg…"
+        : phase === "loaded" && !sets.length ? "No upcoming sets in this bracket"
+        : "Load a set from start.gg",
+    );
 </script>
 
-<section class="panel">
-    {#if signedIn}
-        <input type="text" placeholder="Event link" aria-label="start.gg event link" bind:value={event} />
-        <div class="load">
-            <button type="button" onclick={load} disabled={status === "connecting"}>Load sets</button>
-            <Dropdown label="Set" placeholder={sets.length ? "Pick a set" : "No sets loaded"} options={sets.map((set) => set.label)}
-                bind:value={() => selected, choose} />
-        </div>
-    {:else}
-        <button type="button" onclick={connect} disabled={status === "connecting"}>Connect start.gg</button>
-    {/if}
+<div class="startgg">
+    <Dropdown
+        label="Set" {placeholder} options={labels} bind:value={selected} disabled={!signedIn || !slug}
+        onselect={pick} onopen={loadSets}
+    />
     {#if error}<p role="alert">{error}</p>{/if}
-</section>
+</div>
 
 <style>
-    .load {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        gap: var(--spacing);
-    }
-
     p {
-        margin: 0;
+        margin: 0.5rem 0 0;
         color: #e5484d;
     }
 </style>

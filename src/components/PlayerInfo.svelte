@@ -57,11 +57,6 @@
         line-height: 1;
     }
 
-    .score button:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-
     output {
         align-self: center;
         font-weight: 700;

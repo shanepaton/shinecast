@@ -13,7 +13,7 @@
     <span class="dots" aria-hidden="true">
         {#each { length: player.port }}<span></span>{/each}
     </span>
-    <span class="icon" style:--tint={portColors[player.port - 1]} style:--mask="url({portImage})"></span>
+    <span class="icon masked-icon" style:--tint={portColors[player.port - 1]} style:--icon="url({portImage})"></span>
 {/snippet}
 
 <div class="port-select">
@@ -37,14 +37,11 @@
         background: var(--border);
     }
 
-    /* The SVG is used as a mask so it can take the selected port's colour. */
+    /* The port icon is taller than a normal icon and keeps the proportions of its SVG. */
     .icon {
-        display: block;
+        width: auto;
         height: 2.5rem;
         aspect-ratio: 176 / 169;
-        background: var(--tint);
-        -webkit-mask: var(--mask) center / contain no-repeat;
-        mask: var(--mask) center / contain no-repeat;
     }
 
     /* As wide as a skin slot so the row stays even, as tall as the dots and icon need. */

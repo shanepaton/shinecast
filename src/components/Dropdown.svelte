@@ -2,31 +2,62 @@
     import type { Snippet } from "svelte";
 
     type Option = { label: string; image?: string };
-    type Props = { options: (string | Option)[]; label: string; placeholder?: string; value?: string; trigger?: Snippet };
-    let { options, label, placeholder = "Select or type an option", value = $bindable(""), trigger }: Props = $props();
+    type Props = {
+        options: (string | Option)[];
+        label: string;
+        placeholder?: string;
+        value?: string; // the pick (or, with `custom`, whatever is typed)
+        custom?: boolean; // anything typed counts as the value, not just the options
+        trigger?: Snippet; // an icon to click instead of a text box
+        onselect?: (label: string) => void; // an option was picked
+        onopen?: () => void; // the list is about to open, so it can fill itself first
+        disabled?: boolean;
+    };
+    let {
+        options, label, placeholder = "Select or type an option", value = $bindable(""), custom = false,
+        trigger, onselect, onopen, disabled = false,
+    }: Props = $props();
 
     const VISIBLE_ROWS = 5; // the list scrolls past this many
     const id = $props.id();
 
     let control = $state<HTMLElement>(); // the input (or custom trigger) the list hangs off
     let search = $state<string | null>(null); // what has been typed so far, or null while the list is closed
+    let text = $state<string>(); // what the box shows while it's being searched. Undefined means the picked value
     let highlighted = $state(-1); // the option under the keyboard or pointer, -1 for none
 
     const allOptions = $derived(options.map((option) => (typeof option === "string" ? { label: option } : option)));
     const visible = $derived(allOptions.filter((option) => option.label.toLowerCase().includes(search ?? "")));
     const isOpen = $derived(search !== null && visible.length > 0);
 
-    const close = () => (search = null);
+    // Closing drops any half-typed search, so the box goes back to showing the pick.
+    function close() {
+        search = null;
+        text = undefined;
+    }
+
     const toggle = () => (isOpen ? close() : openList());
 
+    // onopen fires when the list wasn't showing, even if it was empty, so an empty list can fill itself.
     function openList(typed = "") {
+        if (!isOpen) onopen?.();
         search = typed.toLowerCase();
         highlighted = -1;
     }
 
-    // Picking nothing (Enter with no highlight) just closes the list and keeps whatever was typed.
+    function onInput(event: Event & { currentTarget: HTMLInputElement }) {
+        const typed = event.currentTarget.value;
+        if (custom) value = typed;
+        else text = typed;
+        openList(typed);
+    }
+
+    // Picking nothing (Enter with no highlight) just closes the list.
     function choose(option?: Option) {
-        if (option) value = option.label;
+        if (option) {
+            value = option.label;
+            onselect?.(option.label);
+        }
         close();
     }
 
@@ -69,12 +100,14 @@
 
 <div class="dropdown" class:open={isOpen}>
     {#if trigger}
-        <button bind:this={control} type="button" class="trigger" {...comboboxProps} onclick={toggle}>
+        <button bind:this={control} type="button" class="trigger" {disabled} {...comboboxProps} onclick={toggle}>
             {@render trigger()}
         </button>
     {:else}
-        <input bind:this={control} bind:value {placeholder} autocomplete="off" aria-autocomplete="list" {...comboboxProps}
-            onclick={toggle} oninput={(event) => openList(event.currentTarget.value)} />
+        <input
+            bind:this={control} value={text ?? value} {placeholder} {disabled} autocomplete="off" aria-autocomplete="list"
+            {...comboboxProps} onclick={toggle} oninput={onInput}
+        />
         <svg class="chevron" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
             <path d="m2 4 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" />
         </svg>

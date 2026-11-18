@@ -1,9 +1,10 @@
 <script lang="ts">
+    import type { Snippet } from "svelte";
     import Dropdown from "./Dropdown.svelte";
     import rounds from "../data/rounds.json";
     import type { TournamentData } from "../types/TournamentData";
 
-    let { tournament = $bindable() }: { tournament: TournamentData } = $props();
+    let { tournament = $bindable(), children }: { tournament: TournamentData; children?: Snippet } = $props();
 
     const formats = [
         { value: 3, label: "Best of 3" },
@@ -19,12 +20,17 @@
             <button type="button" aria-pressed={tournament.bestOf === value} onclick={() => (tournament.bestOf = value)}>{label}</button>
         {/each}
     </div>
-    <Dropdown label="Tournament round" placeholder="Select or type round" options={rounds} bind:value={tournament.round} />
+    <Dropdown label="Tournament round" placeholder="Select or type round" options={rounds} bind:value={tournament.round} custom />
+    {#if children}<div class="below">{@render children()}</div>{/if}
 </section>
 
 <style>
     .round-info {
         grid-template-columns: auto minmax(0, 1fr);
         align-items: start;
+    }
+
+    .below {
+        grid-column: 1 / -1; /* a row of its own, under both halves */
     }
 </style>
