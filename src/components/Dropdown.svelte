@@ -1,3 +1,8 @@
+<script lang="ts" module>
+    // Only one list is open at a time: opening one closes whichever was open before it.
+    let openNow: (() => void) | undefined;
+</script>
+
 <script lang="ts">
     import type { Snippet } from "svelte";
 
@@ -21,6 +26,7 @@
     const VISIBLE_ROWS = 5; // the list scrolls past this many
     const id = $props.id();
 
+    let root = $state<HTMLElement>();
     let control = $state<HTMLElement>(); // the input (or custom trigger) the list hangs off
     let search = $state<string | null>(null); // what has been typed so far, or null while the list is closed
     let text = $state<string>(); // what the box shows while it's being searched. Undefined means the picked value
@@ -34,15 +40,34 @@
     function close() {
         search = null;
         text = undefined;
+        if (openNow === close) openNow = undefined;
     }
+
+    $effect(() => close); // a list that's removed while open doesn't stay the open one
 
     const toggle = () => (isOpen ? close() : openList());
 
     // onopen fires when the list wasn't showing, even if it was empty, so an empty list can fill itself.
     function openList(typed = "") {
         if (!isOpen) onopen?.();
+        if (openNow && openNow !== close) openNow();
+        openNow = close;
         search = typed.toLowerCase();
         highlighted = -1;
+    }
+
+    // A click anywhere else closes the list. Losing focus alone isn't enough, because clicking a button doesn't focus it
+    // in every webview, so a list opened from an icon would never get told.
+    function onOutsidePointer(event: PointerEvent) {
+        if (search !== null && !root?.contains(event.target as Node)) close();
+    }
+
+    // Escape closes the open list wherever the focus is, since an icon that was clicked may not have taken it. Listening
+    // first, and marking the key as used, also stops the page behind (such as settings) from treating it as its own.
+    function onEscape(event: KeyboardEvent) {
+        if (event.key !== "Escape" || search === null) return;
+        close();
+        event.preventDefault();
     }
 
     function onInput(event: Event & { currentTarget: HTMLInputElement }) {
@@ -96,9 +121,9 @@
     }
 </script>
 
-<svelte:window onblur={close} onresize={close} />
+<svelte:window onblur={close} onresize={close} onpointerdown={onOutsidePointer} onkeydowncapture={onEscape} />
 
-<div class="dropdown" class:open={isOpen}>
+<div class="dropdown" class:open={isOpen} bind:this={root}>
     {#if trigger}
         <button bind:this={control} type="button" class="trigger" {disabled} {...comboboxProps} onclick={toggle}>
             {@render trigger()}

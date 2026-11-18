@@ -5,8 +5,8 @@ export interface StartggTournament {
     events: { name: string; slug: string }[]; // the brackets, e.g. "Melee Singles"
 }
 
-// The tournaments this user is organizing or competing in. 50 of them at a handful of brackets each is well inside
-// start.gg's 1,000-object limit per request.
+// The tournaments this user is organizing or competing in. 50 of them at a handful of brackets each should be inside
+// start.gg's 1,000-object limit per request. That's an estimate, not something that's been measured.
 const TOURNAMENTS_QUERY = `query {
     currentUser {
         tournaments(query: { page: 1, perPage: 50 }) {

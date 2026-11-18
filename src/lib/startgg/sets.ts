@@ -10,8 +10,9 @@ export interface StartggSet {
     players: Partial<PlayerData>[];
 }
 
-// Sets that haven't finished: created (1), active (2), ready (4), called (6) and queued (7). start.gg allows 1,000
-// objects per request, nested ones included, and each set here is about 13, so keep perPage well under 75.
+// Sets that haven't finished. start.gg's docs name these states created, active, ready, called and queued, and the numbers
+// (1, 2, 4, 6, 7) follow the order of that list, which the docs don't spell out. start.gg allows 1,000 objects per request,
+// nested ones included, and each set here is roughly 13 by my count, so keep perPage well under 75.
 const SETS_QUERY = `query ($slug: String!) {
     event(slug: $slug) {
         sets(page: 1, perPage: 50, sortType: CALL_ORDER, filters: { state: [1, 2, 4, 6, 7] }) {

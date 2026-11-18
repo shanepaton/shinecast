@@ -4,8 +4,21 @@ body {
     margin: 0;
 }
 
+/* The interface isn't text to highlight or pictures to drag around. Only what you type in, and error messages (which
+   are worth copying), can be selected. */
+body {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input, [role="alert"] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
 img {
     image-rendering: pixelated; /* nearest-neighbour filtering for all the pixel art */
+    -webkit-user-drag: none;
 }
 
 img[src$=".svg"] {
