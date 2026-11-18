@@ -1,0 +1,96 @@
+/* A text box or icon that opens a list of options. */
+
+.dropdown {
+    position: relative;
+    min-width: 0;
+}
+
+.dropdown input {
+    box-sizing: border-box;
+    width: 100%;
+    padding-right: 2rem;
+}
+
+/* An icon as the trigger, such as the character portrait. It gets a drop shadow in place of a box. */
+.dropdown .trigger {
+    display: block;
+    padding: 0 0 var(--press-depth); /* room for the shadow, which the pressed icon sinks into */
+    overflow: visible;
+    background: none;
+    filter: drop-shadow(var(--shadow));
+    transition: transform var(--press-time), filter var(--press-time);
+}
+
+.dropdown .trigger:active, .dropdown.open .trigger {
+    transform: translateY(var(--press-depth));
+    filter: none;
+}
+
+.chevron {
+    position: absolute;
+    top: 50%;
+    right: var(--spacing);
+    translate: 0 -50%;
+    pointer-events: none;
+}
+
+.dropdown:focus-within .chevron {
+    translate: 0 calc(-50% + var(--press-depth));
+}
+
+.dropdown input:disabled + .chevron {
+    opacity: 0.4;
+}
+
+.dropdown.open .chevron {
+    rotate: 180deg;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + var(--spacing));
+    width: max-content;
+    min-width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--input);
+    box-shadow: var(--shadow);
+}
+
+.dropdown-menu.above {
+    top: auto;
+    bottom: calc(100% + var(--spacing));
+}
+
+.dropdown-menu.end {
+    right: 0;
+}
+
+.dropdown-menu button {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+    width: 100%;
+    text-align: left;
+    background: transparent;
+}
+
+.dropdown-menu button span {
+    margin-left: auto; /* checkmark on the right, everything else on the left */
+}
+
+.dropdown-menu img {
+    width: var(--stock-icon);
+    height: var(--stock-icon);
+    object-fit: contain;
+}
+
+.dropdown-menu .highlighted {
+    background: var(--input);
+}
+
+.dropdown-menu [aria-selected="true"] {
+    color: var(--fg);
+}

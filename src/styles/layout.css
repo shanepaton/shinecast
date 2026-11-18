@@ -1,0 +1,38 @@
+/* The grids everything is laid out on. */
+
+.container, .panel, .row {
+    display: grid;
+    gap: var(--spacing);
+}
+
+.row {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+}
+
+.container {
+    padding: var(--spacing);
+}
+
+.panel, .dropdown-menu {
+    padding: var(--spacing);
+    background: var(--panel);
+    border-radius: var(--radius);
+}
+
+.panel {
+    padding-bottom: calc(var(--spacing) + var(--press-depth)); /* room under the last row for the raised buttons' shadow */
+}
+
+/* A row for one service in settings: its icon, then a box (or several), then a button. The icon column is a fixed
+   width so the boxes line up from one row to the next. */
+.service {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--spacing);
+}
+
+.service > [role="img"] {
+    width: 2rem;
+}

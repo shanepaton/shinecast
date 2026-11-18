@@ -1,0 +1,27 @@
+/* How plain elements look, and the motion setting that applies to everything. */
+
+body {
+    margin: 0;
+}
+
+img {
+    image-rendering: pixelated; /* nearest-neighbour filtering for all the pixel art */
+}
+
+img[src$=".svg"] {
+    image-rendering: auto; /* vectors, not pixel art */
+}
+
+/* Registered so the skin buttons' exit transition can fade the icon smoothly; unregistered custom properties jump. */
+@property --icon-opacity {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

@@ -1,0 +1,68 @@
+/* Buttons, text boxes and icons. Every button and box is raised by default. */
+
+input, button {
+    font: inherit;
+    color: inherit;
+    background: var(--input);
+    border-radius: var(--radius);
+    padding: var(--spacing);
+}
+
+input {
+    min-width: 0;
+    border: 1px solid transparent; /* invisible at rest, like the buttons. Focus colours it, and the size never changes */
+    padding-block: calc(var(--spacing) - 1px); /* so the border doesn't make an input taller than a button */
+}
+
+input:focus {
+    border-color: var(--fg);
+    outline: none;
+}
+
+button {
+    border: 0;
+    cursor: pointer;
+}
+
+button:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+}
+
+/* Raised: everything you press or type in pops out with a shadow, and sinks into it when pressed, focused, selected or
+   switched off. The exceptions are a dropdown's icon trigger (which has a drop shadow of its own), the options in an
+   open list (flat rows), and the "Prefix | Name" line, which is plain text. */
+:is(button, input):not(.trigger, [role="option"], .names input) {
+    box-shadow: var(--shadow);
+    transition: transform var(--press-time), box-shadow var(--press-time);
+}
+
+:is(button:is(:active, [aria-pressed="true"], [aria-checked="true"]), input:focus, button:disabled, input:disabled):not(.trigger, [role="option"], .names input) {
+    transform: translateY(var(--press-depth));
+    box-shadow: none;
+}
+
+.skins {
+    padding-bottom: var(--press-depth); /* room for the shadow, which a pressed skin button sinks into */
+}
+
+.formats button[aria-pressed="true"] {
+    background: var(--fg);
+    color: var(--bg);
+}
+
+/* Anything switched off is dimmed (and, being raised, sunk in). */
+input:disabled, button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* An icon is a white SVG used as a mask, so it takes the text colour, or --tint when there is one. */
+.icon-button span, .masked-icon {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--tint, currentColor);
+    -webkit-mask: var(--icon) center / contain no-repeat;
+    mask: var(--icon) center / contain no-repeat;
+}

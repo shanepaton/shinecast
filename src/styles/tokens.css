@@ -1,0 +1,22 @@
+/* The colours, sizes and timings the rest of the styles are built from. */
+
+:root {
+    --bg: #131720;
+    --fg: #668dff;
+    --panel: #1b202a;
+    --input: #252b36;
+    --text: #e5e7ec;
+    --border: #394150;
+    --spacing: 0.5rem;
+    --radius: 0.25rem;
+    --press-depth: 3px;
+    --cell: 3rem; /* one skin slot or port button */
+    --stock-icon: 36px; /* 1.5x the 24px stock icon */
+    --shadow: 0 var(--press-depth) 0 #151a23;
+    --press-time: 80ms ease-out;
+
+    font: 1rem/1.5 "Ioskeley Mono", monospace;
+    color: var(--text);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+}
