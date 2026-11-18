@@ -5,19 +5,42 @@
     import RoundInfo from "../components/RoundInfo.svelte";
     import Settings from "../components/Settings.svelte";
     import StartggSets from "../components/StartggSets.svelte";
+    import { cooldown } from "../lib/cooldown";
+    import { connectObs, disconnectObs } from "../lib/obs/client";
+    import { fetchScenes } from "../lib/obs/scenes";
     import { isSignedIn } from "../lib/startgg/auth";
     import type { StartggSet } from "../lib/startgg/sets";
     import { loadSaved, save } from "../lib/storage";
     import type { CasterData } from "../types/CasterData";
     import type { ConnectionData } from "../types/ConnectionData";
     import type { EventSelection } from "../types/EventSelection";
+    import type { ObsData } from "../types/ObsData";
     import type { PlayerData } from "../types/PlayerData";
+    import type { SceneSwitching } from "../types/SceneSwitching";
     import type { TournamentData } from "../types/TournamentData";
 
     // The bracket picked in settings. It's remembered between launches, and its tournament names the tournament.
     const saved = loadSaved<EventSelection>("startgg-selection", { tournament: "", event: "", slug: "" });
     let selection = $state(saved);
     $effect(() => save("startgg-selection", selection));
+
+    // Where OBS and the Slippi replays are, also set in settings and remembered.
+    let obs = $state(loadSaved<ObsData>("obs", { ip: "127.0.0.1", port: "4455", password: "" }));
+    $effect(() => save("obs", obs));
+    let slippi = $state(loadSaved("slippi", { folder: "" }));
+    $effect(() => save("slippi", slippi));
+
+    // Which OBS scene to switch to when a game starts, a game ends and a set ends, and after how many milliseconds.
+    const noSwitch = { scene: "", delay: "0" };
+    let sceneSwitching = $state(
+        loadSaved<SceneSwitching>("obs-scenes", {
+            enabled: false,
+            gameScene: { ...noSwitch },
+            gameEnd: { ...noSwitch },
+            setEnd: { ...noSwitch },
+        }),
+    );
+    $effect(() => save("obs-scenes", sceneSwitching));
 
     let tournament = $state<TournamentData>({
         name: saved.tournament,
@@ -60,6 +83,40 @@
 
     let settingsOpen = $state(false);
 
+    // The OBS connection outlives the settings page, so the page keeps its state and passes the buttons down.
+    let obsError = $state("");
+    let obsScenes = $state<string[]>([]); // the scenes OBS has, for the dropdowns
+    const sceneWait = cooldown(2000); // opening the three scene dropdowns in a row asks OBS once
+
+    async function refreshScenes() {
+        if (!sceneWait.ready()) return;
+        try {
+            obsScenes = await fetchScenes();
+        } catch {
+            // the dropdowns keep what they had, and the connection logo shows if OBS is really gone
+        }
+    }
+
+    function connectToObs() {
+        connectObs(obs, (state, error = "") => {
+            connections.obs = state;
+            obsError = error;
+            if (state === "connected") {
+                sceneWait.reset();
+                refreshScenes();
+            } else {
+                obsScenes = [];
+            }
+        });
+    }
+
+    function disconnectFromObs() {
+        disconnectObs();
+        connections.obs = "disconnected";
+        obsError = "";
+        obsScenes = [];
+    }
+
     // Fills in who is playing and the round. Port, character, skin and the rest of the on-stream setup are left alone.
     function loadSet({ round, bestOf, players }: StartggSet) {
         Object.assign(player1, players[0]);
@@ -87,7 +144,11 @@
 </main>
 
 {#if settingsOpen}
-    <Settings bind:tournament bind:selection bind:status={connections.startgg} bind:signedIn onclose={() => (settingsOpen = false)} />
+    <Settings
+        bind:tournament bind:selection bind:slippi bind:obs bind:sceneSwitching
+        {obsScenes} {obsError} {connections} bind:status={connections.startgg} bind:signedIn
+        onscenes={refreshScenes} onobsconnect={connectToObs} onobsdisconnect={disconnectFromObs} onclose={() => (settingsOpen = false)}
+    />
 {/if}
 
 <style>

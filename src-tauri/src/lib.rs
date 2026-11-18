@@ -69,6 +69,7 @@ async fn wait_for_redirect(app: tauri::AppHandle, url: String, port: u16, state:
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![wait_for_redirect])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
