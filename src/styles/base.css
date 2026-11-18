@@ -1,12 +1,9 @@
 /* How plain elements look, and the motion setting that applies to everything. */
 
-body {
-    margin: 0;
-}
-
 /* The interface isn't text to highlight or pictures to drag around. Only what you type in, and error messages (which
    are worth copying), can be selected. */
 body {
+    margin: 0;
     -webkit-user-select: none;
     user-select: none;
 }

@@ -8,7 +8,9 @@
     import StartggSets from "../components/StartggSets.svelte";
     import { cooldown } from "../lib/cooldown";
     import { connectObs, disconnectObs } from "../lib/obs/client";
-    import { fetchScenes } from "../lib/obs/scenes";
+    import { fetchScenes, switchAfter } from "../lib/obs/scenes";
+    import { seatPlayers } from "../lib/slippi/players";
+    import { watchSlippi } from "../lib/slippi/watch";
     import { isSignedIn } from "../lib/startgg/auth";
     import type { StartggSet } from "../lib/startgg/sets";
     import { loadSaved, save } from "../lib/storage";
@@ -17,7 +19,8 @@
     import type { EventSelection } from "../types/EventSelection";
     import type { ObsData } from "../types/ObsData";
     import type { PlayerData } from "../types/PlayerData";
-    import type { SceneSwitching } from "../types/SceneSwitching";
+    import type { SceneSwitch, SceneSwitching } from "../types/SceneSwitching";
+    import type { SlippiEvent, SlippiPlayer } from "../types/SlippiEvent";
     import type { TournamentData } from "../types/TournamentData";
 
     // The bracket picked in settings. It's remembered between launches, and its tournament names the tournament.
@@ -85,7 +88,7 @@
     let caster1 = $state(newCaster());
     let caster2 = $state(newCaster());
 
-    // start.gg and OBS connect from settings. Slippi has nothing to connect to yet, so its logo stays grey.
+    // start.gg and OBS connect from settings. Slippi is connected whenever its replay folder can be watched.
     const hadLogin = isSignedIn();
     let signedIn = $state(hadLogin);
     let connections = $state<ConnectionData>({
@@ -129,6 +132,32 @@
         obsError = "";
         obsScenes = [];
     }
+
+    // Goes to the scene chosen for a moment in the game, if switching is on and OBS is there to do it.
+    function switchTo(change: SceneSwitch) {
+        if (sceneSwitching.enabled && connections.obs === "connected") switchAfter(change);
+    }
+
+    function gameStarted(players: SlippiPlayer[]) {
+        seatPlayers([player1, player2], players);
+        switchTo(sceneSwitching.gameScene);
+    }
+
+    // Whoever won gets the point. Once someone has won the set, its scene replaces the game-end one.
+    function gameEnded(winner: number | null) {
+        const sides = [player1, player2];
+        const won = sides.find(({ port }) => port === winner);
+        if (won) won.score++;
+
+        const { bestOf } = tournament; // crews and endless sets have no winning score to reach
+        const setOver = typeof bestOf === "number" && sides.some(({ score }) => score > bestOf / 2);
+        switchTo(setOver ? sceneSwitching.setEnd : sceneSwitching.gameEnd);
+    }
+
+    const onSlippi = (event: SlippiEvent) => (event.type === "start" ? gameStarted(event.players) : gameEnded(event.winner));
+
+    // Watches the replay folder while one is chosen, and again whenever it changes.
+    $effect(() => watchSlippi(slippi.folder.trim(), onSlippi, (state) => (connections.slippi = state)));
 
     // Will send what's on screen to the stream overlay. There's no overlay to send it to yet, so for now it does nothing.
     function updateOverlay() {}
