@@ -1,0 +1,22 @@
+name = "shinecast-auth"
+main = "index.js"
+compatibility_date = "2026-11-01"
+
+# Serve only from the custom domain (it must be a site on your Cloudflare account), not from *.workers.dev.
+workers_dev = false
+routes = [{ pattern = "oauth.shinecast.app", custom_domain = true }]
+
+[vars]
+STARTGG_CLIENT_ID = "732"
+
+# A login is one /token call and a refresh happens about once a week, so this is far more than real use needs. The
+# limit is per address and per Cloudflare location, and approximate. The namespace_id only has to be unique in the account.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "2941"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
+
+# The secret is not stored here. Set it once with: npx wrangler secret put STARTGG_CLIENT_SECRET

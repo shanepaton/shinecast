@@ -7,8 +7,6 @@ export interface PlayerData {
 
     socials: {
         twitter: string;
-        discord: string;
-        youtube: string;
     };
 
     character?: number; // unset until one is picked
