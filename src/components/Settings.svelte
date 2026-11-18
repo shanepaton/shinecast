@@ -131,6 +131,10 @@
 <div class="settings" role="dialog" aria-modal="true" aria-label="Settings">
     <div class="container">
         <header class="panel service">
+            <span
+                class="masked-icon" role="img" aria-label="Tournament info" title="The tournament name shows in the window title"
+                style:--icon="url(/images/info.svg)"
+            ></span>
             <input type="text" placeholder="Tournament name" aria-label="Tournament name" bind:value={tournament.name} />
             <IconButton icon="home" label="Home" onclick={onclose} />
         </header>
@@ -207,11 +211,6 @@
         z-index: 20; /* over the dropdown menus */
         overflow-y: auto;
         background: var(--bg);
-    }
-
-    /* Just the name box and the Home button for now, so there is no icon column. */
-    header {
-        grid-template-columns: minmax(0, 1fr) auto;
     }
 
     /* The shared service row is logo, box, button. OBS squeezes its address, port and password into the middle. */

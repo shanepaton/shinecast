@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { getCurrentWindow } from "@tauri-apps/api/window";
     import CasterInfo from "../components/CasterInfo.svelte";
     import IconButton from "../components/IconButton.svelte";
     import PlayerInfo from "../components/PlayerInfo.svelte";
@@ -47,6 +48,18 @@
         round: "",
         bestOf: 3,
         nextUp: [],
+    });
+
+    // The window is titled "shinecast", or "shinecast - <tournament>" once the tournament has a name.
+    $effect(() => {
+        const name = tournament.name.trim();
+        const title = name ? `shinecast - ${name}` : "shinecast";
+        document.title = title;
+        try {
+            getCurrentWindow().setTitle(title).catch(() => {});
+        } catch {
+            // not running inside the app (a plain browser), where the page title above is all there is
+        }
     });
 
     const newPlayer = (port: number): PlayerData => ({
@@ -117,6 +130,9 @@
         obsScenes = [];
     }
 
+    // Will send what's on screen to the stream overlay. There's no overlay to send it to yet, so for now it does nothing.
+    function updateOverlay() {}
+
     // Fills in who is playing and the round. Port, character, skin and the rest of the on-stream setup are left alone.
     function loadSet({ round, bestOf, players }: StartggSet) {
         Object.assign(player1, players[0]);
@@ -139,6 +155,7 @@
         <CasterInfo bind:caster={caster2} />
     </div>
     <footer class="panel footer">
+        <button type="button" onclick={updateOverlay}>Update overlay</button>
         <IconButton icon="cog" label="Settings" onclick={() => (settingsOpen = true)} />
     </footer>
 </main>
@@ -160,8 +177,7 @@
     }
 
     .footer {
-        display: flex;
-        justify-content: flex-end;
+        grid-template-columns: minmax(0, 1fr) auto;
         align-self: end;
     }
 </style>

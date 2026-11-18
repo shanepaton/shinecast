@@ -26,7 +26,7 @@
 
 <style>
     .round-info {
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr)); /* half and half */
         align-items: start;
     }
 
