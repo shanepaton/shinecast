@@ -28,16 +28,8 @@
 
 <main class="container">
     <TournamentInfo bind:tournament />
-    <div class="casters">
+    <div class="row">
         <CasterInfo bind:caster={caster1} />
         <CasterInfo bind:caster={caster2} />
     </div>
 </main>
-
-<style>
-    .casters {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 0.5rem;
-    }
-</style>

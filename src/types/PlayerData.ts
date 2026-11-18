@@ -1,17 +1,17 @@
 export interface PlayerData {
-    prefix?: string;
+    prefix: string;
     name: string;
-    pronouns?: string;
-    country?: string;
-    region?: string;
-    
-    socials?: {
-        twitter?: string;
-        discord?: string;
-        youtube?: string;
-    }
-    
-    character: number;
+    pronouns: string;
+    country: string;
+    region: string;
+
+    socials: {
+        twitter: string;
+        discord: string;
+        youtube: string;
+    };
+
+    character?: number; // unset until one is picked
     skin: number;
     port: number;
 

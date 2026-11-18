@@ -1,238 +1,154 @@
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Thin.woff2") format("woff2");
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-ThinItalic.woff2") format("woff2");
-    font-weight: 100;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-ExtraLight.woff2") format("woff2");
-    font-weight: 200;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-ExtraLightItalic.woff2") format("woff2");
-    font-weight: 200;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Light.woff2") format("woff2");
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-LightItalic.woff2") format("woff2");
-    font-weight: 300;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-SemiLight.woff2") format("woff2");
-    font-weight: 350;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-SemiLightItalic.woff2") format("woff2");
-    font-weight: 350;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Regular.woff2") format("woff2");
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Italic.woff2") format("woff2");
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Medium.woff2") format("woff2");
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-MediumItalic.woff2") format("woff2");
-    font-weight: 500;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-SemiBold.woff2") format("woff2");
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-SemiBoldItalic.woff2") format("woff2");
-    font-weight: 600;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Bold.woff2") format("woff2");
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-BoldItalic.woff2") format("woff2");
-    font-weight: 700;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-ExtraBold.woff2") format("woff2");
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-ExtraBoldItalic.woff2") format("woff2");
-    font-weight: 800;
-    font-style: italic;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-Black.woff2") format("woff2");
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "Ioskeley Mono";
-    src: url("/fonts/Ioskeley%20Mono/IoskeleyMono-BlackItalic.woff2") format("woff2");
-    font-weight: 900;
-    font-style: italic;
-    font-display: swap;
-}
+@import "./fonts.css";
 
 :root {
-    font-family: "Ioskeley Mono", monospace;
     --bg: #131720;
     --fg: #668dff;
     --panel: #1b202a;
-    --input: #252B36;
+    --input: #252b36;
     --text: #e5e7ec;
+    --border: #394150;
+    --spacing: 0.5rem;
+    --radius: 0.25rem;
+    --press-depth: 3px;
+    --shadow: 0 var(--press-depth) 0 #151a23;
 
-    font-size: 16px;
-    line-height: 24px;
-    font-weight: 400;
-
+    font: 1rem/1.5 "Ioskeley Mono", monospace;
     color: var(--text);
-    background-color: var(--bg);
-
-    font-synthesis: none;
-    text-rendering: optimizeLegibility;
+    background: var(--bg);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-text-size-adjust: 100%;
-}
-
-button,
-input,
-select,
-textarea {
-    font: inherit;
 }
 
 body {
     margin: 0;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    padding: 0.5rem;
-}
-
-.panel,
-.panel > div {
+.container, .panel, .row {
     display: grid;
-    gap: 0.5rem;
+    gap: var(--spacing);
 }
 
-.panel {
+.row {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+}
+
+.container, .panel, .dropdown-menu {
+    padding: var(--spacing);
+}
+
+.panel, .dropdown-menu {
     background: var(--panel);
-    color: var(--text);
-    padding: .5rem;
-    border-radius: 0.5rem;
+    border-radius: var(--radius);
 }
 
-button,
-input,
-select {
-    padding: 0.5rem 0.75rem;
-    border: none;
-    border-radius: 0.25rem;
+input, button {
+    font: inherit;
+    color: inherit;
     background: var(--input);
-    color: var(--text);
+    border: 0;
+    border-radius: var(--radius);
+    padding: var(--spacing);
+}
+
+input {
+    min-width: 0;
+    border: 1px solid var(--border);
+}
+
+input:focus {
+    border-color: var(--fg);
+    outline: none;
 }
 
 button {
     cursor: pointer;
 }
 
-button[aria-pressed="true"] {
+button:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 3px;
+}
+
+.formats button {
+    box-shadow: var(--shadow);
+    transition: transform 80ms ease-out, box-shadow 80ms ease-out;
+}
+
+.formats button:active, .formats button[aria-pressed="true"] {
+    transform: translateY(var(--press-depth));
+    box-shadow: none;
+}
+
+.formats button[aria-pressed="true"] {
     background: var(--fg);
     color: var(--bg);
 }
 
-button:focus-visible,
-input:focus-visible,
-select:focus-visible {
-    outline: 2px solid var(--fg);
-    outline-offset: 3px;
+@media (prefers-reduced-motion: reduce) {
+    .formats button {
+        transition: none;
+    }
+}
+
+.dropdown {
+    position: relative;
+    min-width: 0;
+}
+
+.dropdown input {
+    box-sizing: border-box;
+    width: 100%;
+    padding-right: 2rem;
+}
+
+.chevron {
+    position: absolute;
+    top: 50%;
+    right: var(--spacing);
+    translate: 0 -50%;
+    pointer-events: none;
+}
+
+.dropdown.open .chevron {
+    rotate: 180deg;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + var(--spacing));
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 10;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--input);
+    box-shadow: var(--shadow);
+}
+
+.dropdown-menu.above {
+    top: auto;
+    bottom: calc(100% + var(--spacing));
+}
+
+.dropdown-menu button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+}
+
+.dropdown-menu img {
+    width: 1.5rem;
+    height: 1.5rem;
+    object-fit: contain;
+}
+
+.dropdown-menu .highlighted {
+    background: var(--input);
+}
+
+.dropdown-menu [aria-selected="true"] {
+    color: var(--fg);
 }
