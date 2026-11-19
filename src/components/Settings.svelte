@@ -133,21 +133,21 @@
         <header class="panel service">
             <span
                 class="masked-icon" role="img" aria-label="Tournament info" title="The tournament name shows in the window title"
-                style:--icon="url(/images/info.svg)"
+                style:--icon="url(/images/ui/icons/info.svg)"
             ></span>
             <input type="text" placeholder="Tournament name" aria-label="Tournament name" bind:value={tournament.name} />
             <IconButton icon="home" label="Home" onclick={onclose} />
         </header>
 
         <section class="panel service">
-            <StatusLogo name="Slippi" logo="/images/slippi.svg" state={connections.slippi} />
+            <StatusLogo name="Slippi" logo="/images/ui/logos/slippi.svg" state={connections.slippi} />
             <input type="text" placeholder="Slippi replay folder" aria-label="Slippi replay folder" bind:value={slippi.folder} />
             <IconButton icon="folder" label="Choose folder" onclick={chooseFolder} />
             {#if folderError}<p role="alert">{folderError}</p>{/if}
         </section>
 
         <section class="panel service obs">
-            <StatusLogo name="OBS" logo="/images/obs.svg" state={connections.obs} />
+            <StatusLogo name="OBS" logo="/images/ui/logos/obs.svg" state={connections.obs} />
             <!-- 45 characters is the longest an IPv6 address gets. The password has no limit, since OBS sets none. -->
             <input type="text" maxlength="45" placeholder="IP address" aria-label="OBS IP address" bind:value={obs.ip} />
             <NumberInput bind:value={obs.port} label="OBS port" placeholder="Port" max={5} />
@@ -180,7 +180,7 @@
 
         <section class="panel">
             <div class="service">
-                <StatusLogo name="start.gg" logo="/images/startdotgg.svg" state={status} />
+                <StatusLogo name="start.gg" logo="/images/ui/logos/startdotgg.svg" state={status} />
                 <span>{status === "connecting" ? "Waiting for start.gg…" : signedIn ? "Start.gg connected" : "Not connected"}</span>
                 {#if signedIn}
                     <IconButton icon="unplug" label="Disconnect start.gg" onclick={disconnect} disabled={status === "connecting"} />

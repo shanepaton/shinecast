@@ -14,6 +14,7 @@
     import { isSignedIn } from "../lib/startgg/auth";
     import type { StartggSet } from "../lib/startgg/sets";
     import { loadSaved, save } from "../lib/storage";
+    import { swapGames, swapNames, swapPlayers } from "../lib/swap";
     import type { CasterData } from "../types/CasterData";
     import type { ConnectionData } from "../types/ConnectionData";
     import type { EventSelection } from "../types/EventSelection";
@@ -162,6 +163,13 @@
     // Will send what's on screen to the stream overlay. There's no overlay to send it to yet, so for now it does nothing.
     function updateOverlay() {}
 
+    // Swaps everything, or with a key held, just one half: Shift for who the players are, Alt for how the game is going.
+    function swap({ shiftKey, altKey }: MouseEvent) {
+        if (shiftKey) swapNames(player1, player2);
+        else if (altKey) swapGames(player1, player2);
+        else swapPlayers(player1, player2);
+    }
+
     // Fills in who is playing and the round. Port, character, skin and the rest of the on-stream setup are left alone.
     function loadSet({ round, bestOf, players }: StartggSet) {
         Object.assign(player1, players[0]);
@@ -172,9 +180,15 @@
 </script>
 
 <main class="container">
-    <div class="row">
+    <div class="row players">
         <PlayerInfo bind:player={player1} />
         <PlayerInfo bind:player={player2} />
+        <!-- Sits on the seam beside the names, which keep clear of it. -->
+        <div class="cutout">
+            <button type="button" class="swap" aria-label="Swap players" title={"Swap players\nShift: names only\nAlt: characters, ports and scores only"} onclick={swap}>
+                <span class="masked-icon" style:--icon="url(/images/ui/icons/swap.svg)"></span>
+            </button>
+        </div>
     </div>
     <RoundInfo bind:tournament>
         <StartggSets bind:status={connections.startgg} bind:signedIn slug={selection.slug} onselect={loadSet} />
@@ -203,6 +217,38 @@
         box-sizing: border-box;
         min-height: 100vh;
         grid-template-rows: auto auto auto 1fr;
+    }
+
+    .players {
+        position: relative;
+    }
+
+    /* The ring stays put while the button inside it is pressed, so it is its own element rather than the button's outline. */
+    .cutout {
+        position: absolute;
+        top: var(--spacing);
+        left: 50%;
+        translate: -50% 0;
+        isolation: isolate; /* keeps the ring behind the button without dropping behind the panels */
+    }
+
+    /* A ring in the page colour cuts the button out of the panels behind it. It is drawn behind the button, not as an
+       outline over it, so the button's shadow shows on the ring and sinks into it when pressed. */
+    .cutout::before {
+        content: "";
+        position: absolute;
+        inset: calc(-1 * var(--spacing));
+        z-index: -1;
+        border-radius: 50%;
+        background: var(--bg);
+    }
+
+    .swap {
+        display: block;
+        height: 2.5rem; /* the height of the name line, so the two line up */
+        padding: 0.5rem;
+        border-radius: 50%;
+        aspect-ratio: 1;
     }
 
     .footer {

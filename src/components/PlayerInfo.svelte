@@ -22,6 +22,7 @@
 
 <style>
     section {
+        --swap-room: 1rem; /* kept clear on both sides of the names for the swap button on the seam */
         container-type: inline-size; /* lets the name line size itself to the panel width (cqw) */
     }
 
@@ -32,8 +33,9 @@
         align-items: center;
         justify-content: center;
         gap: var(--spacing);
-        font-size: clamp(1rem, (100cqw - 2 * var(--spacing)) / (0.62 * (0.75 * var(--prefix-chars) + var(--name-chars)) + 0.6), 2rem);
+        font-size: clamp(1rem, (100cqw - 2 * var(--spacing) - 2 * var(--swap-room)) / (0.62 * (0.75 * var(--prefix-chars) + var(--name-chars)) + 0.6), 2rem);
         line-height: 1.25;
+        padding-inline: var(--swap-room);
     }
 
     .names span {

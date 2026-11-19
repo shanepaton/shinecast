@@ -4,16 +4,14 @@
 
     let { player = $bindable() }: { player: PlayerData } = $props();
 
-    const portImage = "/images/port.svg";
-    const portColors = ["#e5484d", "#4c7dff", "#e8c33f", "#3fb950"]; // ports 1 to 4: red, blue, yellow, green
-    const portOptions = portColors.map((_, index) => ({ label: `Port ${index + 1}`, image: portImage }));
+    // Each port has its own coloured badge: an outline normally, filled in while the button is pressed or its list is open.
+    const portImage = (port: number, filled = false) => `/images/ui/ports/p${port}${filled ? "" : "-outline"}.svg`;
+    const portOptions = [1, 2, 3, 4].map((port) => ({ label: `Port ${port}`, image: portImage(port, true) }));
 </script>
 
 {#snippet port()}
-    <span class="dots" aria-hidden="true">
-        {#each { length: player.port }}<span></span>{/each}
-    </span>
-    <span class="icon masked-icon" style:--tint={portColors[player.port - 1]} style:--icon="url({portImage})"></span>
+    <img class="outline" src={portImage(player.port)} alt="" />
+    <img class="filled" src={portImage(player.port, true)} alt="" />
 {/snippet}
 
 <div class="port-select">
@@ -22,33 +20,29 @@
 </div>
 
 <style>
-    /* One dot per port number, like the player lights on a Wii remote. They never change colour. */
-    .dots {
-        display: flex;
-        justify-content: center;
-        gap: 3px;
-        margin-bottom: 4px;
-    }
-
-    .dots span {
-        width: 6px;
-        aspect-ratio: 1;
-        border-radius: 50%;
-        background: var(--border);
-    }
-
-    /* The port icon is taller than a normal icon and keeps the proportions of its SVG. */
-    .icon {
-        width: auto;
-        height: 2.5rem;
-        aspect-ratio: 176 / 169;
-    }
-
-    /* As wide as a skin slot so the row stays even, as tall as the dots and icon need. */
+    /* Both badges sit in the same spot and the pressed one takes over, so there is no flicker from loading it on press. */
     .port-select :global(.trigger) {
         display: grid;
         place-content: center;
         width: var(--cell);
         min-height: var(--cell);
+    }
+
+    img {
+        grid-area: 1 / 1;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .filled {
+        visibility: hidden;
+    }
+
+    .port-select :global(.trigger:active .filled), .port-select :global(.open .filled) {
+        visibility: visible;
+    }
+
+    .port-select :global(.trigger:active .outline), .port-select :global(.open .outline) {
+        visibility: hidden;
     }
 </style>

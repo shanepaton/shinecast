@@ -5,5 +5,5 @@
 </script>
 
 <button type="button" class="icon-button" aria-label={label} title={label} {onclick} {disabled}>
-    <span style:--icon="url(/images/{icon}.svg)"></span>
+    <span style:--icon="url(/images/ui/icons/{icon}.svg)"></span>
 </button>
