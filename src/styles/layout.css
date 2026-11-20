@@ -36,3 +36,13 @@
 .service > [role="img"] {
     width: 2rem;
 }
+
+/* The bar along the bottom of a page: the main thing on the left, a small button on the right, and an error under both. */
+.footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-self: end;
+}
+
+.footer p {
+    grid-column: 1 / -1;
+}

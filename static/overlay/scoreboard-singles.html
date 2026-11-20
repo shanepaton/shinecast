@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, initial-scale=1" />
+    <title>Singles scoreboard</title>
+    <link rel="stylesheet" href="scoreboard.css" />
+    <style>
+        /*
+         * An OBS browser source at 1920 x 1080, above the video sources. The openings the video shows through are:
+         *   player 1 camera: x 22, y 22, 287 x 442
+         *   player 2 camera: x 1611, y 22, 287 x 442
+         *   gameplay:        x 336, y 28, 1248 x 1025 (inside a frame at x 330, y 22, 1260 x 1037)
+         */
+        :root {
+            --cutouts: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0h1920v1080H0z M335 22H1585Q1590 22 1590 27V1054Q1590 1059 1585 1059H335Q330 1059 330 1054V27Q330 22 335 22z M27 22H304Q309 22 309 27V459Q309 464 304 464H27Q22 464 22 459V27Q22 22 27 22z M1616 22H1893Q1898 22 1898 27V459Q1898 464 1893 464H1616Q1611 464 1611 459V27Q1611 22 1616 22z'/%3E%3C/svg%3E");
+            --bar: 52px; /* the strip under each camera, with the name and score */
+            --name-height: 52px;
+            --score-size: 58px;
+        }
+
+        #gameFrame { left: 330px; top: 22px; width: 1260px; height: 1037px; }
+
+        .team { top: 22px; width: 287px; height: 442px; }
+        #team1 { left: 22px; }
+        #team2 { right: 22px; }
+
+        /* The score sits on the side of the camera that faces the gameplay, and the stock icon on the other. */
+        #team1 .score { right: 0; }
+        #team2 .score { left: 0; }
+        .stock { bottom: 7px; }
+        #team1 .stock { left: 7px; }
+        #team2 .stock { right: 7px; }
+
+        #round { left: 960px; top: 38px; width: 263px; }
+
+        /* The two casters stack in the column beside player 2's camera. */
+        #casters { right: 38px; bottom: 39px; width: 255px; }
+        .caster { height: 60px; }
+        .casterName { font-size: 22px; line-height: 36px; }
+        .casterSocial { font-size: 18px; line-height: 24px; }
+
+        #clock { left: 22px; bottom: 22px; width: 287px; height: 64px; }
+    </style>
+</head>
+<body>
+    <div id="background" aria-hidden="true"></div>
+    <div id="gameFrame" class="shadowed" aria-hidden="true"></div>
+    <time id="clock" class="shadowed"></time>
+
+    <div id="team1" class="team shadowed" role="group" aria-label="Player 1">
+        <img class="stock fade away" alt="" hidden />
+        <div class="name fade away"><span class="prefix"></span> <span class="nameText"></span></div>
+        <div class="score">0</div>
+    </div>
+    <div id="team2" class="team shadowed" role="group" aria-label="Player 2">
+        <img class="stock fade away" alt="" hidden />
+        <div class="name fade away"><span class="prefix"></span> <span class="nameText"></span></div>
+        <div class="score">0</div>
+    </div>
+
+    <div id="round">
+        <div id="roundName" class="fade away"></div>
+        <div id="bestOf" class="fade away"></div>
+    </div>
+
+    <div id="casters">
+        <div class="caster"><div class="casterName fade away"></div><div class="casterSocial fade away"></div></div>
+        <div class="caster"><div class="casterName fade away"></div><div class="casterSocial fade away"></div></div>
+    </div>
+
+    <script src="scoreboard.js"></script>
+</body>
+</html>

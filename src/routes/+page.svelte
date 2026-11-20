@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from "svelte";
     import { getCurrentWindow } from "@tauri-apps/api/window";
     import CasterInfo from "../components/CasterInfo.svelte";
     import IconButton from "../components/IconButton.svelte";
@@ -7,8 +8,10 @@
     import Settings from "../components/Settings.svelte";
     import StartggSets from "../components/StartggSets.svelte";
     import { cooldown } from "../lib/cooldown";
+    import { errorMessage } from "../lib/errors";
     import { connectObs, disconnectObs } from "../lib/obs/client";
     import { fetchScenes, switchAfter } from "../lib/obs/scenes";
+    import { exportOverlay } from "../lib/overlay";
     import { seatPlayers } from "../lib/slippi/players";
     import { watchSlippi } from "../lib/slippi/watch";
     import { isSignedIn } from "../lib/startgg/auth";
@@ -139,7 +142,17 @@
         if (sceneSwitching.enabled && connections.obs === "connected") switchAfter(change);
     }
 
+    // When a set ends the scores go back to 0, once the set-end scene switch has had its delay, so the final score is still
+    // showing while the stream goes to its scene. A game that starts before then is the next set, so it resets right away.
+    let resetTimer: ReturnType<typeof setTimeout> | undefined;
+    function resetScores() {
+        clearTimeout(resetTimer);
+        resetTimer = undefined;
+        player1.score = player2.score = 0;
+    }
+
     function gameStarted(players: SlippiPlayer[]) {
+        if (resetTimer) resetScores();
         seatPlayers([player1, player2], players);
         switchTo(sceneSwitching.gameScene);
     }
@@ -153,6 +166,8 @@
         const { bestOf } = tournament; // crews and endless sets have no winning score to reach
         const setOver = typeof bestOf === "number" && sides.some(({ score }) => score > bestOf / 2);
         switchTo(setOver ? sceneSwitching.setEnd : sceneSwitching.gameEnd);
+        clearTimeout(resetTimer);
+        if (setOver) resetTimer = setTimeout(resetScores, Number(sceneSwitching.setEnd.delay) || 0);
     }
 
     const onSlippi = (event: SlippiEvent) => (event.type === "start" ? gameStarted(event.players) : gameEnded(event.winner));
@@ -160,8 +175,24 @@
     // Watches the replay folder while one is chosen, and again whenever it changes.
     $effect(() => watchSlippi(slippi.folder.trim(), onSlippi, (state) => (connections.slippi = state)));
 
-    // Will send what's on screen to the stream overlay. There's no overlay to send it to yet, so for now it does nothing.
-    function updateOverlay() {}
+    // Writes what's on screen to the overlay folder: a JSON file, a text file for each value, and the images.
+    let overlayError = $state("");
+    async function updateOverlay() {
+        try {
+            await exportOverlay({ players: [player1, player2], casters: [caster1, caster2], tournament });
+            overlayError = "";
+        } catch (e) {
+            overlayError = errorMessage(e);
+        }
+    }
+
+    // The overlay follows the match: it updates when a score, port, character or skin, the round or the format changes.
+    // Names and the like are typed, so they wait for the button (or a set being loaded) instead of updating on every key.
+    $effect(() => {
+        for (const { score, port, character, skin } of [player1, player2]) void [score, port, character, skin];
+        void [tournament.round, tournament.bestOf];
+        untrack(updateOverlay);
+    });
 
     // Swaps everything, or with a key held, just one half: Shift for who the players are, Alt for how the game is going.
     function swap({ shiftKey, altKey }: MouseEvent) {
@@ -176,6 +207,7 @@
         Object.assign(player2, players[1]);
         tournament.round = round;
         if (bestOf) tournament.bestOf = bestOf;
+        updateOverlay();
     }
 </script>
 
@@ -200,6 +232,7 @@
     <footer class="panel footer">
         <button type="button" onclick={updateOverlay}>Update overlay</button>
         <IconButton icon="cog" label="Settings" onclick={() => (settingsOpen = true)} />
+        {#if overlayError}<p role="alert">{overlayError}</p>{/if}
     </footer>
 </main>
 
@@ -249,10 +282,5 @@
         padding: 0.5rem;
         border-radius: 50%;
         aspect-ratio: 1;
-    }
-
-    .footer {
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-self: end;
     }
 </style>

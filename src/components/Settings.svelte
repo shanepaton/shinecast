@@ -6,6 +6,7 @@
     import StatusLogo from "./StatusLogo.svelte";
     import Toggle from "./Toggle.svelte";
     import { errorMessage } from "../lib/errors";
+    import { openOverlayFolder } from "../lib/overlay";
     import { isSignedIn, signIn, signOut } from "../lib/startgg/auth";
     import { fetchTournaments, type StartggTournament } from "../lib/startgg/tournaments";
     import type { ConnectionData, ConnectionState } from "../types/ConnectionData";
@@ -47,6 +48,7 @@
     let loading = $state(false);
     let startggError = $state("");
     let folderError = $state("");
+    let overlayError = $state("");
 
     const obsOnline = $derived(connections.obs === "connected");
     const brackets = $derived(tournaments.find((candidate) => candidate.name === selection.tournament)?.events ?? []);
@@ -136,7 +138,6 @@
                 style:--icon="url(/images/ui/icons/info.svg)"
             ></span>
             <input type="text" placeholder="Tournament name" aria-label="Tournament name" bind:value={tournament.name} />
-            <IconButton icon="home" label="Home" onclick={onclose} />
         </header>
 
         <section class="panel service">
@@ -201,6 +202,12 @@
                 />
             </div>
         </section>
+
+        <footer class="panel footer">
+            <button type="button" onclick={() => openOverlayFolder().catch((e) => (overlayError = errorMessage(e)))}>Open overlays folder</button>
+            <IconButton icon="home" label="Home" onclick={onclose} />
+            {#if overlayError}<p role="alert">{overlayError}</p>{/if}
+        </footer>
     </div>
 </div>
 
@@ -211,6 +218,13 @@
         z-index: 20; /* over the dropdown menus */
         overflow-y: auto;
         background: var(--bg);
+    }
+
+    /* Fills the window so the footer sits at the bottom, like the main page's. */
+    .container {
+        box-sizing: border-box;
+        min-height: 100vh;
+        grid-template-rows: auto auto auto auto 1fr;
     }
 
     /* The shared service row is logo, box, button. OBS squeezes its address, port and password into the middle. */
@@ -241,6 +255,9 @@
     p {
         grid-column: 1 / -1; /* an error runs the full width under its row */
         margin: 0;
+    }
+
+    [role="alert"] {
         color: #e5484d;
     }
 </style>

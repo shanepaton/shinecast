@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, initial-scale=1" />
+    <title>Doubles scoreboard</title>
+    <link rel="stylesheet" href="scoreboard.css" />
+    <style>
+        /*
+         * An OBS browser source at 1920 x 1080, above the video sources. The openings the video shows through are:
+         *   team 1 camera: x 28, y 28, 576 x 324
+         *   team 2 camera: x 28, y 578, 576 x 324
+         *   gameplay:      x 644, y 28, 1248 x 1025 (inside a frame at x 638, y 22, 1260 x 1037)
+         * Each team is entered as one "player": both names in the name field, like "A / B".
+         */
+        :root {
+            --cutouts: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Cpath fill='white' fill-rule='evenodd' d='M0 0H1920V1080H0Z M644 28H1892V1053H644Z M28 28H604V352H28Z M28 578H604V902H28Z'/%3E%3C/svg%3E");
+            --bar: 70px; /* the strip under each camera, with the name and score */
+            --name-height: 64px;
+            --name-inset: 10px;
+            --score-size: 64px;
+        }
+
+        #gameFrame { left: 638px; top: 22px; width: 1260px; height: 1037px; }
+
+        .team { left: 22px; width: 588px; height: 400px; }
+        #team1 { top: 22px; }
+        #team2 { bottom: 108px; }
+
+        .score { right: 0; }
+
+        #round { left: 1268px; top: 38px; width: 263px; }
+
+        #casters { left: 22px; bottom: 22px; width: 392px; height: 64px; display: flex; }
+        .caster { width: 196px; }
+        .casterName { font-size: 24px; line-height: 33px; }
+        .casterSocial { font-size: 20px; line-height: 31px; }
+
+        #clock { left: 414px; bottom: 22px; width: 196px; height: 64px; }
+    </style>
+</head>
+<body>
+    <div id="background" aria-hidden="true"></div>
+    <div id="gameFrame" class="shadowed" aria-hidden="true"></div>
+    <time id="clock" class="shadowed"></time>
+
+    <div id="team1" class="team shadowed" role="group" aria-label="Team 1">
+        <div class="name fade away"><span class="prefix"></span> <span class="nameText"></span></div>
+        <div class="score">0</div>
+    </div>
+    <div id="team2" class="team shadowed" role="group" aria-label="Team 2">
+        <div class="name fade away"><span class="prefix"></span> <span class="nameText"></span></div>
+        <div class="score">0</div>
+    </div>
+
+    <div id="round">
+        <div id="roundName" class="fade away"></div>
+        <div id="bestOf" class="fade away"></div>
+    </div>
+
+    <div id="casters">
+        <div class="caster"><div class="casterName fade away"></div><div class="casterSocial fade away"></div></div>
+        <div class="caster"><div class="casterName fade away"></div><div class="casterSocial fade away"></div></div>
+    </div>
+
+    <script src="scoreboard.js"></script>
+</body>
+</html>

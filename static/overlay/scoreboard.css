@@ -1,0 +1,136 @@
+/*
+ * The look every scoreboard shares: font, colours and sizes. A page adds where everything goes (see scoreboard-singles.html).
+ * This file comes with the app and is replaced when the app updates, like the pages. Save a copy under another name to change it.
+ */
+@font-face {
+    font-family: "ChakraPetch";
+    src: url("fonts/ChakraPetch-Bold.ttf");
+}
+
+:root {
+    --prefix-colour: rgb(116, 116, 116);
+    --round-colour: rgb(206, 206, 206);
+    --social-colour: rgb(168, 168, 168);
+    --score-colour: #333; /* until a port gives it one */
+    --shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
+}
+
+body {
+    position: relative;
+    width: 1920px;
+    height: 1080px;
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+    color: white;
+    font-family: "ChakraPetch", sans-serif;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.shadowed { box-shadow: var(--shadow); }
+
+/* Things that fade out and back in when they change. The script adds .away while one is hidden. */
+.fade {
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+.fade.away {
+    opacity: 0;
+    transform: translateX(var(--away, 0px)); /* only names slide, the rest just fade */
+    transition-duration: 0.2s; /* FADE_OUT_MS in scoreboard.js */
+    transition-timing-function: ease-in;
+}
+
+/* The pattern behind everything, with the page's --cutouts cut out of it for the video to show through. */
+#background {
+    position: absolute;
+    inset: 0;
+    background-image: url("pattern.svg");
+    -webkit-mask-image: var(--cutouts);
+    mask-image: var(--cutouts);
+    animation: scroll 90s linear infinite;
+}
+
+/* Whole 92px tiles, so the pattern is seamless when the loop restarts. */
+@keyframes scroll {
+    to { background-position: 1840px 1104px; }
+}
+
+#gameFrame {
+    position: absolute;
+    box-sizing: border-box;
+    border: 6px solid white;
+    border-radius: 5px;
+}
+
+/* A player's (or team's) box: the camera opening, with a bar along the bottom (--bar tall) for the name and score. */
+.team {
+    position: absolute;
+    box-sizing: border-box;
+    border: 6px solid white;
+    border-bottom-width: var(--bar);
+    border-radius: 5px;
+}
+
+.name {
+    position: absolute;
+    left: var(--name-inset, 0px);
+    right: var(--name-inset, 0px);
+    bottom: calc(-1 * var(--name-height));
+    height: var(--name-height);
+    line-height: var(--name-height);
+    text-align: center;
+    color: black;
+    overflow: hidden;
+    --away: 20px; /* how far a name slides when it changes: team 1 one way, team 2 the other */
+}
+#team2 .name { --away: -20px; }
+.nameText { transition: color 0.3s; }
+.prefix { color: var(--prefix-colour); }
+
+.score {
+    position: absolute;
+    bottom: 0;
+    width: var(--score-size);
+    height: var(--score-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 39px;
+    font-variant-numeric: tabular-nums;
+    background: var(--score-colour);
+    transition: background-color 0.3s;
+}
+
+.stock {
+    position: absolute;
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+#round {
+    position: absolute;
+    transform: translateX(-50%);
+    text-align: center;
+    filter: drop-shadow(0 0 3px black);
+}
+#roundName { font-size: 32px; }
+#bestOf { font-size: 24px; color: var(--round-colour); }
+
+#casters { position: absolute; filter: drop-shadow(0 0 3px black); }
+.caster { text-align: center; }
+.casterSocial { color: var(--social-colour); }
+
+#clock {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: black;
+    font-size: 32px;
+    font-variant-numeric: tabular-nums;
+    border-radius: 5px;
+}
