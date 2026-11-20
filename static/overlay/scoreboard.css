@@ -15,6 +15,12 @@
     --shadow: 8px 8px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* The score box and the name take the colour of the player's port, the same colours as the port tags in the app. */
+[data-port="1"] { --port: #e5484d; }
+[data-port="2"] { --port: #4c7dff; }
+[data-port="3"] { --port: #e8c33f; }
+[data-port="4"] { --port: #3fb950; }
+
 body {
     position: relative;
     width: 1920px;
@@ -37,7 +43,7 @@ body {
 .fade.away {
     opacity: 0;
     transform: translateX(var(--away, 0px)); /* only names slide, the rest just fade */
-    transition-duration: 0.2s; /* FADE_OUT_MS in scoreboard.js */
+    transition-duration: 0.2s; /* how long the script waits before it swaps what is shown */
     transition-timing-function: ease-in;
 }
 
@@ -85,7 +91,7 @@ body {
     --away: 20px; /* how far a name slides when it changes: team 1 one way, team 2 the other */
 }
 #team2 .name { --away: -20px; }
-.nameText { transition: color 0.3s; }
+.nameText { color: var(--port, inherit); transition: color 0.3s; }
 .prefix { color: var(--prefix-colour); }
 
 .score {
@@ -98,7 +104,7 @@ body {
     justify-content: center;
     font-size: 39px;
     font-variant-numeric: tabular-nums;
-    background: var(--score-colour);
+    background: var(--port, var(--score-colour));
     transition: background-color 0.3s;
 }
 

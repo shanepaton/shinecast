@@ -256,8 +256,4 @@
         grid-column: 1 / -1; /* an error runs the full width under its row */
         margin: 0;
     }
-
-    [role="alert"] {
-        color: #e5484d;
-    }
 </style>

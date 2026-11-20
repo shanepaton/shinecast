@@ -13,6 +13,10 @@ input, [role="alert"] {
     user-select: text;
 }
 
+[role="alert"] {
+    color: var(--error);
+}
+
 img {
     image-rendering: pixelated; /* nearest-neighbour filtering for all the pixel art */
     -webkit-user-drag: none;

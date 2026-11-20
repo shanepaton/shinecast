@@ -3,14 +3,11 @@
 
 // ---- Settings --------------------------------------------------------------------------------------------------------
 
-// The score box and the name take the colour of the player's port, the same colours as the port tags in the app.
-const PORT_COLOURS = ["#e5484d", "#4c7dff", "#e8c33f", "#3fb950"];
 const NAME_SIZE = 33; // the biggest a name gets. Longer ones shrink to fit
 const PREFIX_SIZE = 22;
 const MIN_NAME_SIZE = 12;
 const SOCIAL_SECONDS = 12; // how long a caster's twitter shows before their twitch, and back
 const REFRESH_MS = 500;
-const FADE_OUT_MS = 200; // how long .away takes in scoreboard.css
 const BEST_OF = { 3: "Best of 3", 5: "Best of 5", crews: "Crews", endless: "Endless" };
 
 // The folder the app writes data.json and images/ to. Pages live in html/ or a folder inside it, so it is above that.
@@ -36,6 +33,7 @@ function fade(element, update) {
     element.dataset.fading = "true";
     const wasShowing = !element.classList.contains("away");
     element.classList.add("away");
+    const fadeOutMs = parseFloat(getComputedStyle(element).transitionDuration) * 1000; // the css says how long
     setTimeout(async () => {
         try {
             await update();
@@ -43,7 +41,7 @@ function fade(element, update) {
             element.classList.remove("away");
             delete element.dataset.fading;
         }
-    }, wasShowing ? FADE_OUT_MS : 0);
+    }, wasShowing ? fadeOutMs : 0);
 }
 
 /** Changes an element's text with a fade, but only if the text is different. */
@@ -64,17 +62,17 @@ function fitName(box) {
     }
 }
 
-function showName(box, { prefix = "", name = "", port }) {
-    const colour = PORT_COLOURS[port - 1] ?? "";
+// The port goes on the page as data-port, and scoreboard.css decides what colour each port is.
+function showName(box, { prefix = "", name = "", port = "" }) {
     const prefixText = $(".prefix", box), nameText = $(".nameText", box);
     if (prefixText.textContent === prefix && nameText.textContent === name) {
-        nameText.style.color = colour; // only the port changed
+        box.dataset.port = port; // only the port changed
         return;
     }
     fade(box, () => {
         prefixText.textContent = prefix;
         nameText.textContent = name;
-        nameText.style.color = colour;
+        box.dataset.port = port;
         fitName(box);
     });
 }
@@ -98,7 +96,7 @@ function showTeam(team, player = {}) {
     showName($(".name", team), player);
     const score = $(".score", team);
     score.textContent = player.score ?? 0;
-    score.style.backgroundColor = PORT_COLOURS[player.port - 1] ?? "";
+    score.dataset.port = player.port ?? "";
     showStock($(".stock", team), player.images?.stock, `${player.character}-${player.skin}`);
 }
 
